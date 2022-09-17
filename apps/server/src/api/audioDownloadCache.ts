@@ -3,19 +3,8 @@ import ytcog from 'ytcog'
 import fs from 'fs'
 
 const cachePath = '/home/pegasis/Projects/Websites/youtube-tldw-htn/mp3'
-const youtubeIdRegex = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/
 
-function parseYoutubeId(url: string) {
-  const match = url.match(youtubeIdRegex)
-  if (match && match[7].length === 11) {
-    return match[7]
-  } else {
-    throw new Error('Failed to parse youtube video id')
-  }
-}
-
-export async function downloadYoutubeAudio(url: string) {
-  const videoId = parseYoutubeId(url)
+export async function downloadYoutubeAudio(videoId: string) {
   const videoPath = `${cachePath}/${videoId}.mp3`
   try {
     await fs.promises.access(videoPath, fs.constants.F_OK)

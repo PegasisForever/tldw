@@ -5,7 +5,7 @@ import { transcriptAudio } from './transcriptAudio'
 import { generateBulletPoints } from './bulletPoints'
 
 const reqType = z.object({
-  youtubeURL: z.string(),
+  youtubeVideoId: z.string(),
 })
 
 const resType = z.object({
@@ -20,8 +20,8 @@ const resType = z.object({
   ),
 })
 
-export const getTLDW = createRoute(reqType, resType, async ({ youtubeURL }) => {
-  const audioPath = await downloadYoutubeAudio(youtubeURL)
+export const getTLDW = createRoute(reqType, resType, async ({ youtubeVideoId }) => {
+  const audioPath = await downloadYoutubeAudio(youtubeVideoId)
   const transcriptedAudio = await transcriptAudio(audioPath)
   const transcriptChapters = transcriptedAudio.transcript.chapters
 
