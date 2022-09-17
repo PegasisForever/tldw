@@ -1,8 +1,10 @@
-import { Box, List, Stack, Text, useMantineTheme } from '@mantine/core'
-import React, { PropsWithChildren, useEffect, useMemo, useState } from 'react'
+import { ActionIcon, Box, Loader, Stack, Text, TextInput, useMantineTheme } from '@mantine/core'
+import React, { Fragment, PropsWithChildren, useEffect, useMemo, useRef, useState } from 'react'
 import loadingGif from '../../assets/img/loading.gif'
 import logo from '../../assets/img/logo.webp'
 import { ResOf, useQuerySWR } from './network'
+import { IconSend } from '@tabler/icons'
+import produce from 'immer'
 
 const youtubeIdRegex = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/
 
@@ -83,19 +85,87 @@ const LoadingUI = () => {
 }
 
 const ChatUI = (props: ResOf<'getTLDW'>) => {
+  const theme = useMantineTheme()
+  const [askText, setAskText] = useState('')
+  const [chat, setChat] = useState<Array<{ q: string; a: string | null }>>([])
+  const chatContainerRef = useRef<HTMLDivElement>(null)
+
+  const onSend = () => {
+    if (askText) {
+      setChat(old =>
+        produce(old, draft => {
+          draft.push({
+            q: askText,
+            a: null,
+          })
+        })
+      )
+      setAskText('')
+      setTimeout(() => {
+        const el = chatContainerRef.current
+        if (el) {
+          el.scrollTo({
+            top: el.scrollHeight,
+            behavior: 'smooth',
+          })
+        }
+      }, 16)
+    }
+  }
+
   return (
-    <Box
-      sx={{
-        overflowY: 'auto',
-        flexGrow: 1,
-        paddingTop: 6,
-        paddingBottom: 6,
-      }}>
-      <LeftBubble>I summarized the video for you. There are {props.chapters.length} chapters in total :)</LeftBubble>
-      {props.chapters.map((chapter, i) => (
-        <ChapterBubble key={i} chapter={chapter} chapterI={i} />
-      ))}
-    </Box>
+    <>
+      <Box
+        ref={chatContainerRef}
+        sx={{
+          overflowY: 'auto',
+          flexGrow: 1,
+          paddingTop: 6,
+          paddingBottom: 6,
+        }}>
+        <LeftBubble>
+          <Text>I summarized the video for you. There are {props.chapters.length} chapters in total :)</Text>
+        </LeftBubble>
+        {props.chapters.map((chapter, i) => (
+          <ChapterBubble key={i} chapter={chapter} chapterI={i} />
+        ))}
+        {chat.map(({ q, a }, i) => (
+          <Fragment key={i}>
+            <RightBubble>
+              <Text>{q}</Text>
+            </RightBubble>
+            <LeftBubble>{a ? <Text>{a}</Text> : <Loader size={'sm'} />}</LeftBubble>
+          </Fragment>
+        ))}
+      </Box>
+      <Box
+        component={'form'}
+        onSubmit={e => {
+          e.preventDefault()
+          onSend()
+        }}
+        sx={{
+          flexShrink: 0,
+          padding: 6,
+          display: 'flex',
+          backgroundColor: theme.white,
+          borderTop: `1px solid ${theme.colors.gray[5]}`,
+          alignItems: 'center',
+          gap: 8,
+        }}>
+        <TextInput
+          sx={{
+            flexGrow: 1,
+          }}
+          placeholder={'Ask Brevity.....'}
+          value={askText}
+          onChange={e => setAskText(e.target.value)}
+        />
+        <ActionIcon mr={2} color={'blue'} variant={'subtle'} onClick={onSend}>
+          <IconSend size={28} />
+        </ActionIcon>
+      </Box>
+    </>
   )
 }
 
@@ -160,6 +230,7 @@ const ChapterBubble = ({ chapter, chapterI }: { chapter: ResOf<'getTLDW'>['chapt
             component={'ul'}
             sx={{
               marginTop: 4,
+              marginBottom: 0,
               paddingLeft: 16,
             }}>
             {chapter.bullets.map((text, i) => (
@@ -188,6 +259,7 @@ const LeftBubble = ({ children }: PropsWithChildren<{}>) => {
             padding: 12,
             borderRadius: 8,
             position: 'relative',
+            display: 'flex',
             '&:after': {
               content: `""`,
               position: 'absolute',
@@ -202,7 +274,43 @@ const LeftBubble = ({ children }: PropsWithChildren<{}>) => {
               marginLeft: -12,
             },
           }}>
-          <Text>{children}</Text>
+          {children}
+        </Box>
+      </Box>
+    </BubbleAlign>
+  )
+}
+
+const RightBubble = ({ children }: PropsWithChildren<{}>) => {
+  const theme = useMantineTheme()
+  return (
+    <BubbleAlign align={'right'}>
+      <Box
+        sx={{
+          filter: `drop-shadow(0px 0px 1px ${theme.colors.gray[6]})`,
+        }}>
+        <Box
+          sx={{
+            backgroundColor: theme.white,
+            padding: 12,
+            borderRadius: 8,
+            position: 'relative',
+            display: 'flex',
+            '&:after': {
+              content: `""`,
+              position: 'absolute',
+              right: 0,
+              top: '50%',
+              width: 0,
+              height: 0,
+              border: '12px solid transparent',
+              borderLeftColor: theme.white,
+              borderRight: 0,
+              marginTop: -12,
+              marginRight: -12,
+            },
+          }}>
+          {children}
         </Box>
       </Box>
     </BubbleAlign>
