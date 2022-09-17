@@ -23,7 +23,6 @@ export async function downloadYoutubeAudio(url: string) {
     return videoPath
   } catch (e) {
     // empty
-    console.log(e)
   }
 
   console.log('downloading youtube audio')
