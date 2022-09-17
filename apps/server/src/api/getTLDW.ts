@@ -8,6 +8,7 @@ const reqType = z.object({
 })
 
 const resType = z.object({
+  id: z.string(),
   chapters: z.array(
     z.object({
       summary: z.string(),
@@ -25,6 +26,7 @@ export const getTLDW = createRoute(reqType, resType, async ({ youtubeURL }) => {
 
   console.log(transcriptedAudio)
   return {
-    chapters: transcriptedAudio.chapters,
+    id: transcriptedAudio.hash,
+    chapters: transcriptedAudio.transcript.chapters,
   }
 })

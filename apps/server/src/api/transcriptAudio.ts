@@ -4,11 +4,20 @@ import crypto from 'crypto'
 
 const cachePath = '/home/pegasis/Projects/Websites/youtube-tldw-htn/transcripts'
 
-export async function transcriptAudio(filePath: string) {
+export async function getTranscriptFromHash(hash: string) {
+  const transcriptPath = `${cachePath}/${hash}.json`
+  return JSON.parse((await fs.promises.readFile(transcriptPath)).toString('utf-8'))
+}
+
+export async function transcriptAudio(filePath: string): Promise<{
+  transcript: any
+  hash: string
+}> {
   const file = await fs.promises.readFile(filePath)
   const hash = crypto.createHash('sha256')
   hash.update(file)
-  const transcriptPath = `${cachePath}/${hash.digest('hex')}.json`
+  const strHash = hash.digest('hex')
+  const transcriptPath = `${cachePath}/${strHash}.json`
   try {
     await fs.promises.access(transcriptPath, fs.constants.F_OK)
     console.log('transcript cache hit')
@@ -54,7 +63,10 @@ export async function transcriptAudio(filePath: string) {
     const resJson = await res.json()
     if (resJson.status === 'completed') {
       await fs.promises.writeFile(transcriptPath, JSON.stringify(resJson))
-      return res
+      return {
+        transcript: res,
+        hash: strHash,
+      }
     }
   }
 }
