@@ -1,0 +1,31 @@
+{
+  "name": "youtube-tldw-htn",
+  "version": "0.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev --parallel",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,md}\"",
+    "build-server-docker": "docker build --platform amd64 --load -t gcr.io/bpsn-ng/server:latest -f apps/server/Dockerfile ."
+  },
+  "devDependencies": {
+    "eslint-config-custom": "*",
+    "cross-env": "^7.0.3",
+    "prettier": "latest",
+    "turbo": "latest"
+  },
+  "engines": {
+    "npm": ">=7.0.0",
+    "node": ">=14.0.0"
+  },
+  "dependencies": {},
+  "packageManager": "yarn@1.22.19",
+  "prisma": {
+    "schema": "apps/server/prisma/schema.prisma"
+  }
+}

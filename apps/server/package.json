@@ -1,0 +1,41 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "main": "./dist/main.js",
+  "types": "./dist/main.d.ts",
+  "source": "./src/main.ts",
+  "license": "MIT",
+  "scripts": {
+    "build": "yarn clean && tsc",
+    "clean": "ts-clean-built --old --out dist --dir src",
+    "dev": "yarn clean && concurrently 'watchdog tsc --watch' 'nodemon --enable-source-maps dist/main.js'",
+    "start": "NODE_ENV=production node --enable-source-maps dist/main.js",
+    "lint": "eslint 'src/**'"
+  },
+  "dependencies": {
+    "@fastify/cors": "^7.0.0",
+    "@fastify/multipart": "^6.0.0",
+    "@prisma/client": "^4.2.1",
+    "@trpc/server": "^9.23.2",
+    "bunyan": "^1.8.15",
+    "dotenv": "^16.0.0",
+    "fastify": "^3.29.0",
+    "firebase-admin": "^11.0.1",
+    "nanoid": "^3.3.3",
+    "zod": "^3.14.4"
+  },
+  "devDependencies": {
+    "@pegasis/watchdog": "^1.0.6",
+    "@types/bunyan": "^1.8.8",
+    "@types/node": "^16.11.56",
+    "@typescript-eslint/eslint-plugin": "^5.36.0",
+    "@typescript-eslint/parser": "^5.36.0",
+    "concurrently": "^7.1.0",
+    "nodemon": "^2.0.16",
+    "prisma": "^4.2.1",
+    "ts-clean-built": "^1.2.1",
+    "ts-node": "^10.7.0",
+    "type-fest": "^2.12.2",
+    "typescript": "^4.5.3"
+  }
+}

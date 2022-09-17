@@ -1,0 +1,44 @@
+generator client {
+  provider             = "prisma-client-js"
+  previewFeatures      = ["referentialIntegrity", "interactiveTransactions"]
+  referentialIntegrity = "prisma"
+  binaryTargets        = ["native", "linux-musl"]
+}
+
+datasource db {
+  provider             = "mysql"
+  url                  = env("SERVER_DB_ADDRESS")
+  referentialIntegrity = "prisma"
+}
+
+model UserProfile {
+  id String @id
+
+  name String
+  email String?
+  profilePhotoURL String?
+
+  serviceAreaName String
+  serviceArea     ServiceArea @relation(fields: [serviceAreaName], references: [name], onDelete: NoAction, onUpdate: NoAction)
+  Post            Post[]
+}
+
+model ServiceArea {
+  name        String        @id
+  UserProfile UserProfile[]
+  Post        Post[]
+}
+
+model Post {
+  id String @id @default(uuid())
+
+  authorId      String
+  authorProfile UserProfile @relation(fields: [authorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  serviceAreaName String
+  serviceArea     ServiceArea @relation(fields: [serviceAreaName], references: [name], onDelete: NoAction, onUpdate: NoAction)
+
+  createdAt    DateTime @default(now())
+  content      String   @db.Text
+  renderedHTML String   @db.Text
+}
