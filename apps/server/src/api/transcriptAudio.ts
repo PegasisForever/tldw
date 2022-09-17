@@ -21,7 +21,10 @@ export async function transcriptAudio(filePath: string): Promise<{
   try {
     await fs.promises.access(transcriptPath, fs.constants.F_OK)
     console.log('transcript cache hit')
-    return JSON.parse((await fs.promises.readFile(transcriptPath)).toString('utf-8'))
+    return {
+      transcript: JSON.parse((await fs.promises.readFile(transcriptPath)).toString('utf-8')),
+      hash: strHash,
+    }
   } catch (e) {
     // empty
   }

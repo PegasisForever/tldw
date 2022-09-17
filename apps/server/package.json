@@ -18,6 +18,7 @@
     "@prisma/client": "^4.2.1",
     "@trpc/server": "^9.23.2",
     "bunyan": "^1.8.15",
+    "cohere-ai": "^4.3.0",
     "dotenv": "^16.0.0",
     "fastify": "^3.29.0",
     "firebase-admin": "^11.0.1",
