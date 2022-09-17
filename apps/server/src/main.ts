@@ -8,6 +8,7 @@ import { createContext, createRouter } from './createRouter'
 import { nanoid } from 'nanoid'
 import { logger } from './logger'
 import { getTLDW } from './api/getTLDW'
+import { getAnswer } from './api/getAnswer'
 
 const server = fastify({
   genReqId: () => nanoid(),
@@ -35,6 +36,7 @@ const router = createRouter()
     return result
   })
   .query('getTLDW', getTLDW)
+  .query('getAnswer', getAnswer)
 
 server.register(fastifyTRPCPlugin, {
   prefix: '/',
