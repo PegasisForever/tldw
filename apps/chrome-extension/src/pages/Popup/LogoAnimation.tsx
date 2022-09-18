@@ -24,7 +24,7 @@ const useStyles = createStyles(theme => ({
   }
 }))
 
-export const LogoAnimation = (props: { size: number }) => {
+export const LogoAnimation = (props: { size: number, fast: boolean }) => {
   const {classes, theme} = useStyles()
   const circleR = props.size / 3.5
   const gap = circleR / 4
@@ -44,7 +44,7 @@ export const LogoAnimation = (props: { size: number }) => {
         scale: 1
       }}
       transition={{
-        delay: 0.5,
+        delay: 0.2,
         type: 'spring',
         damping: 5,
         mass: 0.25,
@@ -58,7 +58,7 @@ export const LogoAnimation = (props: { size: number }) => {
         scale: 1
       }}
       transition={{
-        delay: 0.6,
+        delay: 0.3,
         type: 'spring',
         damping: 5,
         mass: 0.25,
@@ -72,13 +72,16 @@ export const LogoAnimation = (props: { size: number }) => {
         scale: 1
       }}
       transition={{
-        delay: 0.7,
+        delay: 0.4,
         type: 'spring',
         damping: 5,
         mass: 0.25,
       }}/>
     <m.g
       className={classes.rotation1}
+      style={{
+        animationDuration: props.fast ? '3s' : '6s'
+      }}
       initial={{
         opacity: 0
       }}
@@ -86,20 +89,23 @@ export const LogoAnimation = (props: { size: number }) => {
         opacity: 1
       }}
       transition={{
-        delay: 0.5,
+        delay: 0.2,
         duration: 0.5
       }}>
       <m.circle
         cx={props.size / 2} cy={props.size / 2} r={circleR + gap} fill={'transparent'}
-        strokeWidth={1} stroke={theme.colors.gray[3]}
+        strokeWidth={1} stroke={theme.colors.gray[4]}
 
       />
-      <circle cx={props.size / 2 + circleR + gap} cy={props.size / 2} r={3} fill={theme.colors.gray[5]}/>
-      <circle cx={props.size / 2 - circleR - gap} cy={props.size / 2} r={3} fill={theme.colors.gray[5]}/>
+      <circle cx={props.size / 2 + circleR + gap} cy={props.size / 2} r={2} fill={theme.colors.gray[6]}/>
+      <circle cx={props.size / 2 - circleR - gap} cy={props.size / 2} r={2} fill={theme.colors.gray[6]}/>
     </m.g>
 
     <m.g
       className={classes.rotation2}
+      style={{
+        animationDuration: props.fast ? '4s' : '8s'
+      }}
       initial={{
         opacity: 0
       }}
@@ -107,15 +113,15 @@ export const LogoAnimation = (props: { size: number }) => {
         opacity: 1
       }}
       transition={{
-        delay: 0.5,
+        delay: 0.2,
         duration: 0.5
       }}>
       <m.circle
         cx={props.size / 2} cy={props.size / 2} r={circleR + gap * 2} fill={'transparent'}
-        strokeWidth={1} stroke={theme.colors.gray[3]}
+        strokeWidth={1} stroke={theme.colors.gray[4]}
       />
-      <circle cx={props.size / 2 + circleR + gap * 2} cy={props.size / 2} r={3} fill={theme.colors.gray[5]}/>
-      <circle cx={props.size / 2 - circleR - gap * 2} cy={props.size / 2} r={3} fill={theme.colors.gray[5]}/>
+      <circle cx={props.size / 2 + circleR + gap * 2} cy={props.size / 2} r={2} fill={theme.colors.gray[6]}/>
+      <circle cx={props.size / 2 - circleR - gap * 2} cy={props.size / 2} r={2} fill={theme.colors.gray[6]}/>
     </m.g>
 
   </svg>

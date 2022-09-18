@@ -1,11 +1,10 @@
-import { ActionIcon, Box, Loader, Stack, Text, TextInput, useMantineTheme } from '@mantine/core'
-import React, { Fragment, PropsWithChildren, useEffect, useMemo, useRef, useState } from 'react'
-import loadingGif from '../../assets/img/loading.gif'
-import logo from '../../assets/img/logo.webp'
-import { client, ResOf, useQuerySWR } from './network'
-import { IconSend } from '@tabler/icons'
+import {ActionIcon, Box, Loader, Stack, Text, TextInput, useMantineTheme, Button} from '@mantine/core'
+import React, {Fragment, PropsWithChildren, useRef, useState} from 'react'
+import {client, ResOf} from './network'
+import {IconSend} from '@tabler/icons'
 import produce from 'immer'
 import {LogoAnimation} from "./LogoAnimation";
+import {m} from 'framer-motion'
 
 const youtubeIdRegex = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/
 
@@ -18,72 +17,83 @@ function parseYoutubeId(url: string) {
   }
 }
 
+type Data = ResOf<'getTLDW'>
+
 export const Popup = () => {
-  const [url, setUrl] = useState<string>()
-
-  useEffect(() => {
-    chrome.tabs
-      .query({
-        active: true,
-        currentWindow: true,
-      })
-      .then(tabs => setUrl(tabs[0].url))
-  }, [])
-
-  const videoId = useMemo(() => {
-    if (url) {
-      return parseYoutubeId(url)
-    } else {
-      return undefined
-    }
-  }, [url])
-
-  const [res] = useQuerySWR('getTLDW', videoId ? { youtubeVideoId: videoId } : null)
+  const [data, setData] = useState<Data | null>(null)
 
   const theme = useMantineTheme()
   return (
     <Box
       sx={{
+        position: 'relative',
         width: 400,
         height: 600,
-        display: 'flex',
-        flexDirection: 'column',
-        backgroundColor: theme.colors.gray[1],
+        background: theme.fn.linearGradient(135, '#fad9c8', '#b5ede2'),
       }}>
-      <Box
-        px={16}
-        py={8}
-        sx={{
-          borderBottom: `1px solid ${theme.colors.gray[5]}`,
-          fontSize: 24,
-          flexShrink: 0,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-          backgroundColor: theme.white,
-        }}>
-        <img src={logo} width={32} alt={''} />
-        <span>Brevity</span>
-      </Box>
-      {res ? <ChatUI {...res} /> : <LoadingUI />}
+      <WelcomeUI data={data} setData={setData}/>
+      {data ? <ChatUI {...data} /> : null}
     </Box>
   )
 }
 
-const LoadingUI = () => {
+const WelcomeUI = (props: { data: Data | null, setData: (data: Data) => void }) => {
+  const [isLoading, setIsLoading] = useState(false)
+
   return (
     <Stack
       align={'center'}
       justify={'center'}
       sx={{
-        flexGrow: 1,
+        position: 'absolute',
+        left: 0,
+        top: 0,
+        width: '100%',
+        height: '100%'
       }}>
-      <LogoAnimation size={250}/>
+      <LogoAnimation size={250} fast={isLoading}/>
+      <m.div
+        initial={{
+          opacity: 0
+        }}
+        animate={{
+          opacity: 1
+        }}
+        transition={{
+          delay: 0.4,
+          duration: 0.5
+        }}>
+        <Button disabled={isLoading} variant={'default'} px={48} sx={{
+          borderRadius: 36,
+          border: 'none',
+        }} onClick={async () => {
+          try {
+            setIsLoading(true)
+            const tabs = await chrome.tabs
+              .query({
+                active: true,
+                currentWindow: true,
+              })
+            const url = tabs[0].url
+            const videoId = parseYoutubeId(url!)
+            if (!videoId) return
+
+            const res = await client.query('getTLDW', {youtubeVideoId: videoId})
+            props.setData(res)
+          } catch (e) {
+            console.log(e)
+          } finally {
+            setIsLoading(false)
+          }
+        }}>
+          Make It Brief
+        </Button>
+      </m.div>
     </Stack>
   )
 }
 
-const ChatUI = (props: ResOf<'getTLDW'>) => {
+const ChatUI = (props: Data) => {
   const theme = useMantineTheme()
   const [askText, setAskText] = useState('')
   const [chat, setChat] = useState<Array<{ q: string; a: string | null }>>([])
@@ -112,7 +122,7 @@ const ChatUI = (props: ResOf<'getTLDW'>) => {
         })
       )
       client
-        .query('getAnswer', { id: props.id, question: askText })
+        .query('getAnswer', {id: props.id, question: askText})
         .then(res => {
           setChat(old =>
             produce(old, draft => {
@@ -150,14 +160,14 @@ const ChatUI = (props: ResOf<'getTLDW'>) => {
           <Text>I summarized the video for you. There are {props.chapters.length} chapters in total :)</Text>
         </LeftBubble>
         {props.chapters.map((chapter, i) => (
-          <ChapterBubble key={i} chapter={chapter} chapterI={i} />
+          <ChapterBubble key={i} chapter={chapter} chapterI={i}/>
         ))}
-        {chat.map(({ q, a }, i) => (
+        {chat.map(({q, a}, i) => (
           <Fragment key={i}>
             <RightBubble>
               <Text>{q}</Text>
             </RightBubble>
-            <LeftBubble>{a ? <Text>{a}</Text> : <Loader size={'sm'} />}</LeftBubble>
+            <LeftBubble>{a ? <Text>{a}</Text> : <Loader size={'sm'}/>}</LeftBubble>
           </Fragment>
         ))}
       </Box>
@@ -185,14 +195,14 @@ const ChatUI = (props: ResOf<'getTLDW'>) => {
           onChange={e => setAskText(e.target.value)}
         />
         <ActionIcon mr={2} color={'blue'} variant={'subtle'} onClick={onSend}>
-          <IconSend size={28} />
+          <IconSend size={28}/>
         </ActionIcon>
       </Box>
     </>
   )
 }
 
-const BubbleAlign = ({ children, align }: PropsWithChildren<{ align: 'left' | 'right' }>) => {
+const BubbleAlign = ({children, align}: PropsWithChildren<{ align: 'left' | 'right' }>) => {
   return (
     <Box
       sx={{
@@ -214,7 +224,7 @@ const formatMilliSeconds = (ms: number) => {
   return `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`
 }
 
-const ChapterBubble = ({ chapter, chapterI }: { chapter: ResOf<'getTLDW'>['chapters'][number]; chapterI: number }) => {
+const ChapterBubble = ({chapter, chapterI}: { chapter: ResOf<'getTLDW'>['chapters'][number]; chapterI: number }) => {
   const theme = useMantineTheme()
   return (
     <BubbleAlign align={'left'}>
@@ -268,7 +278,7 @@ const ChapterBubble = ({ chapter, chapterI }: { chapter: ResOf<'getTLDW'>['chapt
   )
 }
 
-const LeftBubble = ({ children }: PropsWithChildren<{}>) => {
+const LeftBubble = ({children}: PropsWithChildren<{}>) => {
   const theme = useMantineTheme()
   return (
     <BubbleAlign align={'left'}>
@@ -304,7 +314,7 @@ const LeftBubble = ({ children }: PropsWithChildren<{}>) => {
   )
 }
 
-const RightBubble = ({ children }: PropsWithChildren<{}>) => {
+const RightBubble = ({children}: PropsWithChildren<{}>) => {
   const theme = useMantineTheme()
   return (
     <BubbleAlign align={'right'}>
