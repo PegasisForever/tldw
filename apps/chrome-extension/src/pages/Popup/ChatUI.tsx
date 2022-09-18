@@ -1,6 +1,6 @@
 import {client, Data, ResOf} from "./network";
 import {ActionIcon, Box, Loader, Text, TextInput, useMantineTheme} from "@mantine/core";
-import React, {Fragment, PropsWithChildren, useMemo, useRef, useState} from "react";
+import React, {Fragment, PropsWithChildren, ReactChild, useMemo, useRef, useState} from "react";
 import produce from "immer";
 import {m} from "framer-motion";
 import icon from "../../assets/img/icon-128.png";
@@ -68,6 +68,12 @@ export const ChatUI = (props: Data) => {
     }
   }
 
+  let bubbleI = 0
+  const getDelay = () => {
+    bubbleI++
+    return (bubbleI - 1) * 0.1
+  }
+
   return (
     <Box sx={{
       position: 'absolute',
@@ -91,10 +97,18 @@ export const ChatUI = (props: Data) => {
           alignItems: 'center',
           justifyContent: 'center',
           gap: 8,
-        }}>
+        }}
+        initial={{
+          translateY: '-100%',
+          opacity: 0,
+        }}
+        animate={{
+          translateY: 0,
+          opacity: 1,
+        }}
+      >
         <img src={icon} width={24} alt={''}/>
         <span>Brevity</span>
-
       </Box>
       <Box
         ref={chatContainerRef}
@@ -104,7 +118,7 @@ export const ChatUI = (props: Data) => {
           paddingTop: 18,
           paddingBottom: 54,
         }}>
-        <LeftBubble showLogo>
+        <LeftBubble showLogo delay={getDelay()}>
           <Text size={'sm'}>
             Brevity found {props.chapters.length} topics in this video.
           </Text>
@@ -113,14 +127,15 @@ export const ChatUI = (props: Data) => {
           </Text>
         </LeftBubble>
         {props.chapters.map((chapter, i) => (
-          <ChapterBubble key={i} chapter={chapter} chapterI={i} showLogo={i === props.chapters.length - 1}/>
+          <ChapterBubble key={i} chapter={chapter} chapterI={i} showLogo={i === props.chapters.length - 1}
+                         delay={getDelay()}/>
         ))}
         {chat.map(({q, a}, i) => (
           <Fragment key={i}>
             <RightBubble>
               <Text>{q}</Text>
             </RightBubble>
-            <LeftBubble showLogo>
+            <LeftBubble showLogo delay={0.1}>
               {a ?
                 <Text>{a}</Text> :
                 <Loader size={'sm'} sx={{display: 'flex'}}/>
@@ -130,7 +145,15 @@ export const ChatUI = (props: Data) => {
         ))}
       </Box>
       <Box
-        component={'form'}
+        component={m.form}
+        initial={{
+          translateY: 50,
+          opacity: 0,
+        }}
+        animate={{
+          translateY: 0,
+          opacity: 1,
+        }}
         sx={{
           position: 'absolute',
           left: 64,
@@ -178,10 +201,11 @@ const formatMilliSeconds = (ms: number) => {
 const ChapterBubble = ({
                          chapter,
                          chapterI,
-                         showLogo
-                       }: { chapter: ResOf<'getTLDW'>['chapters'][number]; chapterI: number, showLogo?: boolean }) => {
+                         showLogo,
+                         delay
+                       }: { chapter: ResOf<'getTLDW'>['chapters'][number]; chapterI: number, showLogo?: boolean, delay?: number }) => {
   const theme = useMantineTheme()
-  return <LeftBubble showLogo={showLogo}>
+  return <LeftBubble showLogo={showLogo} delay={delay}>
     <Text size={'xs'} color={'dimmed'}>
       <Box component={'span'}
            sx={{color: theme.black}}>Topic {chapterI + 1}</Box> | {formatMilliSeconds(chapter.start)} - {formatMilliSeconds(chapter.end)}
@@ -206,13 +230,25 @@ const ChapterBubble = ({
   </LeftBubble>
 }
 
-const LeftBubble = ({children, showLogo}: PropsWithChildren<{ showLogo?: boolean }>) => {
+const LeftBubble = ({children, showLogo, delay}: PropsWithChildren<{ showLogo?: boolean, delay?: number }>) => {
   const theme = useMantineTheme()
-  return <Box mb={showLogo ? 18 : 6} sx={{
-    display: 'flex',
-    alignItems: 'flex-end',
-    paddingRight: 64,
-  }}>
+  return <Box
+    component={m.div}
+    initial={{
+      opacity: 0,
+      translateY: 100,
+    }}
+    animate={{
+      opacity: 1,
+      translateY: 0,
+    }}
+    transition={{delay}}
+    mb={showLogo ? 18 : 6}
+    sx={{
+      display: 'flex',
+      alignItems: 'flex-end',
+      paddingRight: 64,
+    }}>
     <Box sx={{width: 48, paddingLeft: 8, display: 'flex'}}>
       {showLogo ? <img src={icon} width={32} alt={''}/> : null}
     </Box>
@@ -228,13 +264,25 @@ const LeftBubble = ({children, showLogo}: PropsWithChildren<{ showLogo?: boolean
   </Box>
 }
 
-const RightBubble = ({children}: PropsWithChildren<{}>) => {
+const RightBubble = ({children, delay}: PropsWithChildren<{ delay?: number }>) => {
   const theme = useMantineTheme()
-  return <Box mb={18} mr={16} ml={80} sx={{
-    backgroundColor: theme.white,
-    padding: 12,
-    borderRadius: 16,
-  }}>
+  return <Box
+    component={m.div}
+    initial={{
+      opacity: 0,
+      translateY: 100,
+    }}
+    animate={{
+      opacity: 1,
+      translateY: 0,
+    }}
+    transition={{delay}}
+    mb={18} mr={16} ml={80}
+    sx={{
+      backgroundColor: theme.white,
+      padding: 12,
+      borderRadius: 16,
+    }}>
     {children}
   </Box>
 }

@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import {Button, Stack} from "@mantine/core";
+import {Button, Box} from "@mantine/core";
 import {LogoAnimation} from "./LogoAnimation";
 import {m} from "framer-motion";
 import {client, Data} from "./network";
@@ -17,12 +17,15 @@ function parseYoutubeId(url: string) {
 
 export const WelcomeUI = (props: { data: Data | null, setData: (data: Data) => void }) => {
   const [isLoading, setIsLoading] = useState(false)
-
   return (
-    <Stack
-      align={'center'}
-      justify={'center'}
+    <Box
+      component={m.div}
+      animate={{opacity: props.data ? 0 : 1}}
       sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
         position: 'absolute',
         left: 0,
         top: 0,
@@ -41,12 +44,13 @@ export const WelcomeUI = (props: { data: Data | null, setData: (data: Data) => v
           delay: 0.4,
           duration: 0.5
         }}>
-        <Button disabled={isLoading} variant={'default'} px={48} sx={{
+        <Button disabled={isLoading || !!props.data} variant={'default'} px={48} sx={{
           borderRadius: 99999,
           border: 'none',
         }} onClick={async () => {
           try {
             setIsLoading(true)
+            // await new Promise(r => setTimeout(r, 2000));
             const tabs = await chrome.tabs
               .query({
                 active: true,
@@ -67,6 +71,6 @@ export const WelcomeUI = (props: { data: Data | null, setData: (data: Data) => v
           Make It Brief
         </Button>
       </m.div>
-    </Stack>
+    </Box>
   )
 }
