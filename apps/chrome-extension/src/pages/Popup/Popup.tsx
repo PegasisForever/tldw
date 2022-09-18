@@ -1,23 +1,11 @@
 import {ActionIcon, Box, Loader, Stack, Text, TextInput, useMantineTheme, Button} from '@mantine/core'
 import React, {Fragment, PropsWithChildren, useRef, useState} from 'react'
-import {client, ResOf} from './network'
+import {client, Data, ResOf} from './network'
 import {IconSend} from '@tabler/icons'
 import produce from 'immer'
-import {LogoAnimation} from "./LogoAnimation";
+import {WelcomeUI} from "./WelcomeUI";
 import {m} from 'framer-motion'
-
-const youtubeIdRegex = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/
-
-function parseYoutubeId(url: string) {
-  const match = url.match(youtubeIdRegex)
-  if (match && match[7].length === 11) {
-    return match[7]
-  } else {
-    return undefined
-  }
-}
-
-type Data = ResOf<'getTLDW'>
+import icon from '../../assets/img/icon-128.png'
 
 export const Popup = () => {
   const [data, setData] = useState<Data | null>(null)
@@ -34,62 +22,6 @@ export const Popup = () => {
       <WelcomeUI data={data} setData={setData}/>
       {data ? <ChatUI {...data} /> : null}
     </Box>
-  )
-}
-
-const WelcomeUI = (props: { data: Data | null, setData: (data: Data) => void }) => {
-  const [isLoading, setIsLoading] = useState(false)
-
-  return (
-    <Stack
-      align={'center'}
-      justify={'center'}
-      sx={{
-        position: 'absolute',
-        left: 0,
-        top: 0,
-        width: '100%',
-        height: '100%'
-      }}>
-      <LogoAnimation size={250} fast={isLoading}/>
-      <m.div
-        initial={{
-          opacity: 0
-        }}
-        animate={{
-          opacity: 1
-        }}
-        transition={{
-          delay: 0.4,
-          duration: 0.5
-        }}>
-        <Button disabled={isLoading} variant={'default'} px={48} sx={{
-          borderRadius: 36,
-          border: 'none',
-        }} onClick={async () => {
-          try {
-            setIsLoading(true)
-            const tabs = await chrome.tabs
-              .query({
-                active: true,
-                currentWindow: true,
-              })
-            const url = tabs[0].url
-            const videoId = parseYoutubeId(url!)
-            if (!videoId) return
-
-            const res = await client.query('getTLDW', {youtubeVideoId: videoId})
-            props.setData(res)
-          } catch (e) {
-            console.log(e)
-          } finally {
-            setIsLoading(false)
-          }
-        }}>
-          Make It Brief
-        </Button>
-      </m.div>
-    </Stack>
   )
 }
 
@@ -147,14 +79,40 @@ const ChatUI = (props: Data) => {
   }
 
   return (
-    <>
+    <Box sx={{
+      position: 'absolute',
+      left: 0,
+      top: 0,
+      width: '100%',
+      height: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+    }}>
+      <Box
+        component={m.div}
+        sx={{
+          flexShrink: 0,
+          padding: 8,
+          backgroundColor: '#002f49',
+          color: theme.white,
+          fontWeight: 600,
+          fontSize: 20,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 8,
+        }}>
+        <img src={icon} width={24} alt={''}/>
+        <span>Brevity</span>
+
+      </Box>
       <Box
         ref={chatContainerRef}
         sx={{
           overflowY: 'auto',
           flexGrow: 1,
           paddingTop: 6,
-          paddingBottom: 6,
+          paddingBottom: 54,
         }}>
         <LeftBubble>
           <Text>I summarized the video for you. There are {props.chapters.length} chapters in total :)</Text>
@@ -171,34 +129,29 @@ const ChatUI = (props: Data) => {
           </Fragment>
         ))}
       </Box>
-      <Box
-        component={'form'}
-        onSubmit={e => {
-          e.preventDefault()
-          onSend()
-        }}
+      <TextInput
+        radius={'xl'}
         sx={{
-          flexShrink: 0,
-          padding: 6,
-          display: 'flex',
-          backgroundColor: theme.white,
-          borderTop: `1px solid ${theme.colors.gray[5]}`,
-          alignItems: 'center',
-          gap: 8,
+          position: 'absolute',
+          left: 64,
+          right: 64,
+          bottom: 12,
+        }}
+        styles={{
+          input: {
+            backgroundColor: theme.fn.rgba(theme.white, 0.9),
+          }
+        }}
+        rightSection={<ActionIcon mr={2} color={'blue'} variant={'subtle'} onClick={onSend} sx={{
+          borderRadius: 99999
         }}>
-        <TextInput
-          sx={{
-            flexGrow: 1,
-          }}
-          placeholder={'Ask Brevity.....'}
-          value={askText}
-          onChange={e => setAskText(e.target.value)}
-        />
-        <ActionIcon mr={2} color={'blue'} variant={'subtle'} onClick={onSend}>
-          <IconSend size={28}/>
-        </ActionIcon>
-      </Box>
-    </>
+          <IconSend size={22}/>
+        </ActionIcon>}
+        placeholder={"I'm looking for something specific..."}
+        value={askText}
+        onChange={e => setAskText(e.target.value)}
+      />
+    </Box>
   )
 }
 

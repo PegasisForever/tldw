@@ -12,6 +12,8 @@ export type ResOf<T extends keyof ServerRouter['_def']['queries']> = inferProced
   ServerRouter['_def']['queries'][T]
 >
 
+export type Data = ResOf<'getTLDW'>
+
 export function useQuerySWR<Key extends keyof ServerRouter['_def']['queries']>(
   key: Key,
   data: inferProcedureInput<ServerRouter['_def']['queries'][Key]> | null
