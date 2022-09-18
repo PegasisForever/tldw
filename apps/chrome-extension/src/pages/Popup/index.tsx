@@ -3,10 +3,16 @@ import { render } from 'react-dom'
 
 import { Popup } from './Popup'
 import { MantineProvider } from '@mantine/core'
+import { SWRConfig } from 'swr'
 
 render(
   <MantineProvider withGlobalStyles withNormalizeCSS>
-    <Popup />
+    <SWRConfig
+      value={{
+        refreshInterval: 0,
+      }}>
+      <Popup />
+    </SWRConfig>
   </MantineProvider>,
   window.document.querySelector('#app-container')
 )

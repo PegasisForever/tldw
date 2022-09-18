@@ -2,7 +2,7 @@ import { ActionIcon, Box, Loader, Stack, Text, TextInput, useMantineTheme } from
 import React, { Fragment, PropsWithChildren, useEffect, useMemo, useRef, useState } from 'react'
 import loadingGif from '../../assets/img/loading.gif'
 import logo from '../../assets/img/logo.webp'
-import { ResOf, useQuerySWR } from './network'
+import { client, ResOf, useQuerySWR } from './network'
 import { IconSend } from '@tabler/icons'
 import produce from 'immer'
 
@@ -90,8 +90,20 @@ const ChatUI = (props: ResOf<'getTLDW'>) => {
   const [chat, setChat] = useState<Array<{ q: string; a: string | null }>>([])
   const chatContainerRef = useRef<HTMLDivElement>(null)
 
+  const scrollToBottom = () => {
+    setTimeout(() => {
+      const el = chatContainerRef.current
+      if (el) {
+        el.scrollTo({
+          top: el.scrollHeight,
+          behavior: 'smooth',
+        })
+      }
+    }, 16)
+  }
+
   const onSend = () => {
-    if (askText) {
+    if (askText && (chat.length === 0 || chat[chat.length - 1].a !== null)) {
       setChat(old =>
         produce(old, draft => {
           draft.push({
@@ -100,16 +112,28 @@ const ChatUI = (props: ResOf<'getTLDW'>) => {
           })
         })
       )
+      client
+        .query('getAnswer', { id: props.id, question: askText })
+        .then(res => {
+          setChat(old =>
+            produce(old, draft => {
+              draft[draft.length - 1].a =
+                res.answer ?? "Sorry, this video doesn't appear to have content relating to your question."
+            })
+          )
+          scrollToBottom()
+        })
+        .catch(e => {
+          console.error(e)
+          setChat(old =>
+            produce(old, draft => {
+              draft[draft.length - 1].a = 'There is an error, please try later.'
+            })
+          )
+          scrollToBottom()
+        })
       setAskText('')
-      setTimeout(() => {
-        const el = chatContainerRef.current
-        if (el) {
-          el.scrollTo({
-            top: el.scrollHeight,
-            behavior: 'smooth',
-          })
-        }
-      }, 16)
+      scrollToBottom()
     }
   }
 
