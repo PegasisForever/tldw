@@ -67,7 +67,7 @@ export async function transcriptAudio(filePath: string): Promise<{
     if (resJson.status === 'completed') {
       await fs.promises.writeFile(transcriptPath, JSON.stringify(resJson))
       return {
-        transcript: res,
+        transcript: resJson,
         hash: strHash,
       }
     }
