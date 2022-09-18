@@ -2,7 +2,7 @@
 import ytcog from 'ytcog'
 import fs from 'fs'
 
-const cachePath = '/home/pegasis/Projects/Websites/youtube-tldw-htn/mp3'
+const cachePath = '../../mp3'
 
 export async function downloadYoutubeAudio(videoId: string) {
   const videoPath = `${cachePath}/${videoId}.mp3`

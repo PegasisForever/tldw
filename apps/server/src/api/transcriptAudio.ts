@@ -2,7 +2,7 @@ import fetch from 'node-fetch'
 import fs from 'fs'
 import crypto from 'crypto'
 
-const cachePath = '/home/pegasis/Projects/Websites/youtube-tldw-htn/transcripts'
+const cachePath = '../../transcripts'
 
 export async function getTranscriptFromHash(hash: string) {
   const transcriptPath = `${cachePath}/${hash}.json`

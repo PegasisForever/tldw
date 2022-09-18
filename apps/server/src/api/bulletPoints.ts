@@ -2,7 +2,7 @@ import cohere from 'cohere-ai'
 import crypto from 'crypto'
 import fs from 'fs'
 
-const cachePath = '/home/pegasis/Projects/Websites/youtube-tldw-htn/bullets'
+const cachePath = '../../bullets'
 
 cohere.init(process.env.COHERE_KEY!)
 
