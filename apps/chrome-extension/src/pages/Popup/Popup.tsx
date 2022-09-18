@@ -5,6 +5,7 @@ import logo from '../../assets/img/logo.webp'
 import { client, ResOf, useQuerySWR } from './network'
 import { IconSend } from '@tabler/icons'
 import produce from 'immer'
+import {LogoAnimation} from "./LogoAnimation";
 
 const youtubeIdRegex = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/
 
@@ -19,7 +20,6 @@ function parseYoutubeId(url: string) {
 
 export const Popup = () => {
   const [url, setUrl] = useState<string>()
-  console.log('url', url)
 
   useEffect(() => {
     chrome.tabs
@@ -78,8 +78,7 @@ const LoadingUI = () => {
       sx={{
         flexGrow: 1,
       }}>
-      <img src={loadingGif} width={64} height={64} alt={''} />
-      <Text size={'lg'}>Brevity is thinking.....</Text>
+      <LogoAnimation size={250}/>
     </Stack>
   )
 }
