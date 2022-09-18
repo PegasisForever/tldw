@@ -1,31 +1,9 @@
 import {m} from 'framer-motion'
 import React from 'react'
-import {createStyles, keyframes} from "@mantine/core";
-
-const rotation = keyframes`
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-`
-
-const useStyles = createStyles(theme => ({
-  rotation1: {
-    animation: `${rotation} 6s linear infinite`,
-    transformOrigin: '50% 50%',
-    transformBox: 'fill-box'
-  },
-  rotation2: {
-    animation: `${rotation} 8s linear infinite reverse`,
-    transformOrigin: '50% 50%',
-    transformBox: 'fill-box'
-  }
-}))
+import {useMantineTheme} from "@mantine/core";
 
 export const LogoAnimation = (props: { size: number, fast: boolean }) => {
-  const {classes, theme} = useStyles()
+  const theme = useMantineTheme()
   const circleR = props.size / 3.5
   const gap = circleR / 4
   return <svg width={props.size} height={props.size}>
@@ -78,50 +56,64 @@ export const LogoAnimation = (props: { size: number, fast: boolean }) => {
         mass: 0.25,
       }}/>
     <m.g
-      className={classes.rotation1}
-      style={{
-        animationDuration: props.fast ? '3s' : '6s'
-      }}
-      initial={{
-        opacity: 0
-      }}
       animate={{
-        opacity: 1
+        rotate: [0, 360]
       }}
       transition={{
-        delay: 0.2,
-        duration: 0.5
-      }}>
-      <m.circle
-        cx={props.size / 2} cy={props.size / 2} r={circleR + gap} fill={'transparent'}
-        strokeWidth={1} stroke={theme.colors.gray[4]}
+        duration: props.fast ? 3 : 6,
+        ease: "linear",
+        repeat: Infinity,
+      }}
+    >
+      <m.g
+        initial={{
+          opacity: 0
+        }}
+        animate={{
+          opacity: 1
+        }}
+        transition={{
+          delay: 0.2,
+          duration: 0.5
+        }}>
+        <m.circle
+          cx={props.size / 2} cy={props.size / 2} r={circleR + gap} fill={'transparent'}
+          strokeWidth={1} stroke={theme.colors.gray[4]}
 
-      />
-      <circle cx={props.size / 2 + circleR + gap} cy={props.size / 2} r={2} fill={theme.colors.gray[6]}/>
-      <circle cx={props.size / 2 - circleR - gap} cy={props.size / 2} r={2} fill={theme.colors.gray[6]}/>
+        />
+        <circle cx={props.size / 2 + circleR + gap} cy={props.size / 2} r={2} fill={theme.colors.gray[6]}/>
+        <circle cx={props.size / 2 - circleR - gap} cy={props.size / 2} r={2} fill={theme.colors.gray[6]}/>
+      </m.g>
     </m.g>
 
     <m.g
-      className={classes.rotation2}
-      style={{
-        animationDuration: props.fast ? '4s' : '8s'
-      }}
-      initial={{
-        opacity: 0
-      }}
       animate={{
-        opacity: 1
+        rotate: [360, 0]
       }}
       transition={{
-        delay: 0.2,
-        duration: 0.5
-      }}>
-      <m.circle
-        cx={props.size / 2} cy={props.size / 2} r={circleR + gap * 2} fill={'transparent'}
-        strokeWidth={1} stroke={theme.colors.gray[4]}
-      />
-      <circle cx={props.size / 2 + circleR + gap * 2} cy={props.size / 2} r={2} fill={theme.colors.gray[6]}/>
-      <circle cx={props.size / 2 - circleR - gap * 2} cy={props.size / 2} r={2} fill={theme.colors.gray[6]}/>
+        duration: props.fast ? 4 : 8,
+        ease: "linear",
+        repeat: Infinity,
+      }}
+    >
+      <m.g
+        initial={{
+          opacity: 0
+        }}
+        animate={{
+          opacity: 1
+        }}
+        transition={{
+          delay: 0.2,
+          duration: 0.5
+        }}>
+        <m.circle
+          cx={props.size / 2} cy={props.size / 2} r={circleR + gap * 2} fill={'transparent'}
+          strokeWidth={1} stroke={theme.colors.gray[4]}
+        />
+        <circle cx={props.size / 2 + circleR + gap * 2} cy={props.size / 2} r={2} fill={theme.colors.gray[6]}/>
+        <circle cx={props.size / 2 - circleR - gap * 2} cy={props.size / 2} r={2} fill={theme.colors.gray[6]}/>
+      </m.g>
     </m.g>
 
   </svg>
